@@ -1,0 +1,14 @@
+v {xschem version=2.9.9 file_version=1.2 }
+G {}
+K {type=raw_data_show
+vhdl_ignore=true
+spice_ignore=false
+verilog_ignore=true
+tedax_ignore=true
+template="name=r1 node=xxx
+descr=\\"I=\\""@descr}
+V {}
+S {}
+E {}
+T {@descr} 0 -10 0 0 0.2 0.2 {vcenter=true layer=15}
+T {tcleval([ ngspice::get_node [subst -nocommand \{@node\\\}] ] )} 40 -10 0 0 0.2 0.2 {vcenter=true layer=15}

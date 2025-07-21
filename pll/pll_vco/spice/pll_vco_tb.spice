@@ -1,0 +1,286 @@
+**.subckt pll_vco_tb
+V1 _vdd gnd 1.8
+I0 vdd ibias 100u
+Vmeas1 vdd _vdd 0
+Vtune vtune gnd 0.9
+R1 vco_out0 gnd 100k m=1
+R2 vco_out1 gnd 100k m=1
+R3 vco_out2 gnd 100k m=1
+R4 vco_out3 gnd 100k m=1
+R5 vco_out4 gnd 100k m=1
+R6 vco_out5 gnd 100k m=1
+R7 vco_out6 gnd 100k m=1
+R8 vco_out7 gnd 100k m=1
+Imeas0 vco_out<0> vco_out0 0
+Imeas1 vco_out<1> vco_out1 0
+Imeas2 vco_out<2> vco_out2 0
+Imeas3 vco_out<3> vco_out3 0
+Imeas4 vco_out<4> vco_out4 0
+Imeas5 vco_out<5> vco_out5 0
+Imeas6 vco_out<6> vco_out6 0
+Imeas7 vco_out<7> vco_out7 0
+V2 vco_out0 gnd dc 0 pulse 0 1.8 0.1n 0.1n 0.1n 0.1n 3600
+x1 vdd vtune vco_out<7> vco_out<6> vco_out<5> vco_out<4> vco_out<3> vco_out<2> vco_out<1> vco_out<0>
++ ibias gnd gnd pll_vco
+**** begin user architecture code
+
+
+
+.option savecurrents
+.option rshunt = 1e12
+.option gmin = 1e-24
+*.option method=Gear
+*.option chgtol=1e-12
+
+.option method=gear
+*.option abstol=1e-12
+.option vntol=1e-6
+*.option chgtol=1e-16
+.option reltol=1e-6
+*.option trtol=10
+
+
+*.model switch1 aswitch(cntl_off=0.0 cntl_on=0.1 r_off=1e12 r_on=1.0 log=TRUE)
+.model sw SW (ron=0.1 roff=1e12 vt=0.5 vh=0)
+
+.control
+* Main Amplifier
+** Main Core OP params
+save i(@m.x1.xm1.msky130_fd_pr__nfet_01v8[id])
+save @m.x1.xm1.msky130_fd_pr__nfet_01v8[gm]
+save v(@m.x1.xm1.msky130_fd_pr__nfet_01v8[vds])
+save v(@m.x1.xm1.msky130_fd_pr__nfet_01v8[vgs])
+save v(@m.x1.xm1.msky130_fd_pr__nfet_01v8[vth])
+save v(@m.x1.xm1.msky130_fd_pr__nfet_01v8[vdsat])
+
+
+* #################################################################
+* #
+* #                         OPERATING POINT
+* #
+* #################################################################
+save all
+save v(vin_p)
+save v(vin_n)
+save v(vg_p)
+save v(vg_n)
+save v(vout_p)
+save v(vout_n)
+
+op
+set filetype=binary
+write pll_vco_tb.raw all
+
+* #################################################################
+* #
+* #                 TRANSIENT OSCILATION REGIME
+* #
+* #################################################################
+reset
+save all
+save v(vco_out)
+save v(vco_out<0>) v(vco_out<1>) v(vco_out<2>) v(vco_out<3>) v(vco_out<4>) v(vco_out<5>)
++ v(vco_out<6>) v(vco_out<7>)
+save v(vtune)
+
+*.ic v(vco_out<0>)=1.8 v(vco_out<4>)=0
+*.ic v(vco_out0)=1.8 v(vco_out4)=0
+tran 1n 10n 0
+set filetype=ascii
+write pll_vco_tb_tran.raw all
+
+plot v(vco_out0) v(vco_out1) v(vco_out2) v(vco_out3) v(vco_out4) v(vco_out5) v(vco_out6) v(vco_out7)
+plot v(vtune)
+plot v(vco_out0)
+
+.endc
+
+
+
+.options wnflag=1
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/nfet_01v8/sky130_fd_pr__nfet_01v8__tt.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/nfet_01v8_lvt/sky130_fd_pr__nfet_01v8_lvt__tt.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/pfet_01v8/sky130_fd_pr__pfet_01v8__tt.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/nfet_03v3_nvt/sky130_fd_pr__nfet_03v3_nvt__tt.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/nfet_05v0_nvt/sky130_fd_pr__nfet_05v0_nvt__tt.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/esd_nfet_01v8/sky130_fd_pr__esd_nfet_01v8__tt.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/pfet_01v8_lvt/sky130_fd_pr__pfet_01v8_lvt__tt.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/pfet_01v8_hvt/sky130_fd_pr__pfet_01v8_hvt__tt.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/esd_pfet_g5v0d10v5/sky130_fd_pr__esd_pfet_g5v0d10v5__tt.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/pfet_g5v0d10v5/sky130_fd_pr__pfet_g5v0d10v5__tt.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/pfet_g5v0d16v0/sky130_fd_pr__pfet_g5v0d16v0__tt.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/nfet_g5v0d10v5/sky130_fd_pr__nfet_g5v0d10v5__tt.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/nfet_g5v0d16v0/sky130_fd_pr__nfet_g5v0d16v0__tt_discrete.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/esd_nfet_g5v0d10v5/sky130_fd_pr__esd_nfet_g5v0d10v5__tt.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/models/corners/tt/nonfet.spice
+* Mismatch parameters
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/nfet_01v8/sky130_fd_pr__nfet_01v8__mismatch.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/pfet_01v8/sky130_fd_pr__pfet_01v8__mismatch.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/nfet_01v8_lvt/sky130_fd_pr__nfet_01v8_lvt__mismatch.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/pfet_01v8_lvt/sky130_fd_pr__pfet_01v8_lvt__mismatch.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/pfet_01v8_hvt/sky130_fd_pr__pfet_01v8_hvt__mismatch.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/nfet_g5v0d10v5/sky130_fd_pr__nfet_g5v0d10v5__mismatch.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/pfet_g5v0d10v5/sky130_fd_pr__pfet_g5v0d10v5__mismatch.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/nfet_05v0_nvt/sky130_fd_pr__nfet_05v0_nvt__mismatch.corner.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/cells/nfet_03v3_nvt/sky130_fd_pr__nfet_03v3_nvt__mismatch.corner.spice
+* Resistor/home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/Capacitor
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/models/r+c/res_typical__cap_typical.spice
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/models/r+c/res_typical__cap_typical__lin.spice
+* Special cells
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/models/corners/tt/specialized_cells.spice
+* All models
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/models/all.spice
+* Corner
+.include /home/jdv/open_source_asic_design/skywater-pdk/libraries/sky130_fd_pr/latest/models/corners/tt/rf.spice
+
+**** end user architecture code
+**.ends
+
+* expanding   symbol:  ../xschem/pll_vco.sym # of pins=6
+* sym_path: /home/jdv/sky130_pll/pll/pll_vco/xschem/pll_vco.sym
+* sch_path: /home/jdv/sky130_pll/pll/pll_vco/xschem/pll_vco.sch
+.subckt pll_vco  vdd vtune vco_out<7> vco_out<6> vco_out<5> vco_out<4> vco_out<3> vco_out<2>
++ vco_out<1> vco_out<0> Ibias vss sdn
+*.iopin vss
+*.iopin vdd
+*.iopin vtune
+*.iopin Ibias
+*.opin vco_out<0>,vco_out<1>,vco_out<2>,vco_out<3>,vco_out<4>,vco_out<5>,vco_out<6>,vco_out<7>
+*.iopin sdn
+**** begin user architecture code
+
+
+.control
+save i(@m.${path}xm1.msky130_fd_pr__nfet_01v8[id])
+save @m.${path}xm1.msky130_fd_pr__nfet_01v8[gm]
+save v(@m.${path}xm1.msky130_fd_pr__nfet_01v8[vds])
+save v(@m.${path}xm1.msky130_fd_pr__nfet_01v8[vgs])
+save v(@m.${path}xm1.msky130_fd_pr__nfet_01v8[vth])
+save v(@m.${path}xm1.msky130_fd_pr__nfet_01v8[vdsat])
+
+save i(@m.${path}xm2.msky130_fd_pr__nfet_01v8[id])
+save @m.${path}xm2.msky130_fd_pr__nfet_01v8[gm]
+save v(@m.${path}xm2.msky130_fd_pr__nfet_01v8[vds])
+save v(@m.${path}xm2.msky130_fd_pr__nfet_01v8[vgs])
+save v(@m.${path}xm2.msky130_fd_pr__nfet_01v8[vth])
+save v(@m.${path}xm2.msky130_fd_pr__nfet_01v8[vdsat])
+.endc
+
+
+**** end user architecture code
+XM0 Ibias Ibias vss vss sky130_fd_pr__nfet_01v8 L=0.3 W=10 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W'
++ sa=0 sb=0 sd=0 mult=1 m=1 
+x5<0> phi<0> vss vss vdd vdd net1<7> sky130_fd_sc_hs__inv_1
+x5<1> phi<1> vss vss vdd vdd net1<6> sky130_fd_sc_hs__inv_1
+x5<2> phi<2> vss vss vdd vdd net1<5> sky130_fd_sc_hs__inv_1
+x5<3> phi<3> vss vss vdd vdd net1<4> sky130_fd_sc_hs__inv_1
+x5<4> phi<4> vss vss vdd vdd net1<3> sky130_fd_sc_hs__inv_1
+x5<5> phi<5> vss vss vdd vdd net1<2> sky130_fd_sc_hs__inv_1
+x5<6> phi<6> vss vss vdd vdd net1<1> sky130_fd_sc_hs__inv_1
+x5<7> phi<7> vss vss vdd vdd net1<0> sky130_fd_sc_hs__inv_1
+x6<0> net1<7> vss vss vdd vdd net2<7> sky130_fd_sc_hs__inv_2
+x6<1> net1<6> vss vss vdd vdd net2<6> sky130_fd_sc_hs__inv_2
+x6<2> net1<5> vss vss vdd vdd net2<5> sky130_fd_sc_hs__inv_2
+x6<3> net1<4> vss vss vdd vdd net2<4> sky130_fd_sc_hs__inv_2
+x6<4> net1<3> vss vss vdd vdd net2<3> sky130_fd_sc_hs__inv_2
+x6<5> net1<2> vss vss vdd vdd net2<2> sky130_fd_sc_hs__inv_2
+x6<6> net1<1> vss vss vdd vdd net2<1> sky130_fd_sc_hs__inv_2
+x6<7> net1<0> vss vss vdd vdd net2<0> sky130_fd_sc_hs__inv_2
+x7<0> net2<7> vss vss vdd vdd vco_out<0> sky130_fd_sc_hs__inv_4
+x7<1> net2<6> vss vss vdd vdd vco_out<1> sky130_fd_sc_hs__inv_4
+x7<2> net2<5> vss vss vdd vdd vco_out<2> sky130_fd_sc_hs__inv_4
+x7<3> net2<4> vss vss vdd vdd vco_out<3> sky130_fd_sc_hs__inv_4
+x7<4> net2<3> vss vss vdd vdd vco_out<4> sky130_fd_sc_hs__inv_4
+x7<5> net2<2> vss vss vdd vdd vco_out<5> sky130_fd_sc_hs__inv_4
+x7<6> net2<1> vss vss vdd vdd vco_out<6> sky130_fd_sc_hs__inv_4
+x7<7> net2<0> vss vss vdd vdd vco_out<7> sky130_fd_sc_hs__inv_4
+x1 phi<0> phi<4> phi<7> phi<3> vdd vtune Ibias vss sdn pll_vco_cell
+x2 phi<1> phi<5> phi<0> phi<4> vdd vtune Ibias vss sdn pll_vco_cell
+x3 phi<2> phi<6> phi<1> phi<5> vdd vtune Ibias vss sdn pll_vco_cell
+x4 phi<3> phi<7> phi<2> phi<6> vdd vtune Ibias vss sdn pll_vco_cell
+.ends
+
+
+* expanding   symbol:  pll_vco_cell/xschem/pll_vco_cell.sym # of pins=9
+* sym_path: /home/jdv/sky130_pll/pll/pll_vco/../pll_vco_cell/xschem/pll_vco_cell.sym
+* sch_path: /home/jdv/sky130_pll/pll/pll_vco/../pll_vco_cell/xschem/pll_vco_cell.sch
+.subckt pll_vco_cell  out_n out_p in_p in_n vdd vtune vbias vss sdn
+*.iopin vss
+*.iopin vdd
+*.ipin in_p
+*.ipin in_n
+*.iopin vbias
+*.opin out_n
+*.opin out_p
+*.ipin vtune
+*.ipin sdn
+**** begin user architecture code
+
+
+*.control
+*save i(@m.${path}xm1.msky130_fd_pr__nfet_01v8[id])
+*save @m.${path}xm1.msky130_fd_pr__nfet_01v8[gm]
+*save v(@m.${path}xm1.msky130_fd_pr__nfet_01v8[vds])
+*save v(@m.${path}xm1.msky130_fd_pr__nfet_01v8[vgs])
+*save v(@m.${path}xm1.msky130_fd_pr__nfet_01v8[vth])
+*save v(@m.${path}xm1.msky130_fd_pr__nfet_01v8[vdsat])
+
+*save i(@m.${path}xm2.msky130_fd_pr__nfet_01v8[id])
+*save @m.${path}xm2.msky130_fd_pr__nfet_01v8[gm]
+*save v(@m.${path}xm2.msky130_fd_pr__nfet_01v8[vds])
+*save v(@m.${path}xm2.msky130_fd_pr__nfet_01v8[vgs])
+*save v(@m.${path}xm2.msky130_fd_pr__nfet_01v8[vth])
+*save v(@m.${path}xm2.msky130_fd_pr__nfet_01v8[vdsat])
+*.endc
+
+
+**** end user architecture code
+XM3 net1 vbias vss vss sky130_fd_pr__nfet_01v8 L=0.3 W=60 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W'
++ sa=0 sb=0 sd=0 mult=4 m=4 
+XM10 vbias sdn vss vss sky130_fd_pr__nfet_01v8 L=0.15 W=0.5 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W'
++ sa=0 sb=0 sd=0 mult=1 m=1 
+x1 sdn vss vss vdd vdd net2 sky130_fd_sc_hd__inv_1
+x2 sdn vss vss vdd vdd net3 sky130_fd_sc_hd__inv_1
+XM4 out_n out_n vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=8 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W'
++ sa=0 sb=0 sd=0 mult=1 m=1 
+XM5 out_p out_p vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=8 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W'
++ sa=0 sb=0 sd=0 mult=1 m=1 
+XM7 out_p out_n vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=16 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W'
++ sa=0 sb=0 sd=0 mult=1 m=1 
+XM6 out_n out_p vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=16 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W'
++ sa=0 sb=0 sd=0 mult=1 m=1 
+XM8 out_n net2 vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=0.5 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W'
++ sa=0 sb=0 sd=0 mult=1 m=1 
+XM9 out_p net3 vdd vdd sky130_fd_pr__pfet_01v8 L=0.15 W=0.5 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W'
++ sa=0 sb=0 sd=0 mult=1 m=1 
+XM1 out_n in_p net1 vss sky130_fd_pr__nfet_01v8 L=0.15 W=16 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W'
++ sa=0 sb=0 sd=0 mult=1 m=1 
+XM2 out_p in_n net1 vss sky130_fd_pr__nfet_01v8 L=0.15 W=16 nf=1 ad='int((nf+1)/2) * W/nf * 0.29' as='int((nf+2)/2) * W/nf * 0.29'
++ pd='2*int((nf+1)/2) * (W/nf + 0.29)' ps='2*int((nf+2)/2) * (W/nf + 0.29)' nrd='0.29 / W' nrs='0.29 / W'
++ sa=0 sb=0 sd=0 mult=1 m=1 
+XC1 out_n vtune vss sky130_fd_pr__cap_var_lvt W=7 L=4 VM=3
+XC2 out_p vtune vss sky130_fd_pr__cap_var_lvt W=7 L=4 VM=3
+.ends
+
+.GLOBAL gnd
+** flattened .save nodes
+.save I(Vmeas1)
+.save I(Imeas0)
+.save I(Imeas1)
+.save I(Imeas2)
+.save I(Imeas3)
+.save I(Imeas4)
+.save I(Imeas5)
+.save I(Imeas6)
+.save I(Imeas7)
+.end

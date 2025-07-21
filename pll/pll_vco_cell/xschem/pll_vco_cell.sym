@@ -1,0 +1,41 @@
+v {xschem version=2.9.9 file_version=1.2 }
+G {}
+K {type=subcircuit
+format="@name @pinlist @symname"
+template="name=x1"
+}
+V {}
+S {}
+E {}
+L 4 -60 -20 -40 -20 {}
+L 4 -60 20 -40 20 {}
+L 4 40 -20 80 -20 {}
+L 4 40 20 80 20 {}
+L 4 -40 -60 80 0 {}
+L 4 -40 60 80 0 {}
+L 4 -40 -60 -40 60 {}
+L 4 -20 50 -20 80 {}
+L 4 0 40 0 80 {}
+L 4 20 30 20 80 {}
+L 4 20 -80 20 -30 {}
+L 4 0 -80 0 -40 {}
+B 5 77.5 -22.5 82.5 -17.5 {name=out_n dir=out }
+B 5 77.5 17.5 82.5 22.5 {name=out_p dir=out }
+B 5 -62.5 -22.5 -57.5 -17.5 {name=in_p dir=in }
+B 5 -62.5 17.5 -57.5 22.5 {name=in_n dir=in }
+B 5 17.5 -82.5 22.5 -77.5 {name=vdd dir=inout}
+B 5 -2.5 -82.5 2.5 -77.5 {name=vtune dir=in}
+B 5 -2.5 77.5 2.5 82.5 {name=vbias dir=inout}
+B 5 17.5 77.5 22.5 82.5 {name=vss dir=inout}
+B 5 -22.5 77.5 -17.5 82.5 {name=sdn dir=in}
+T {@symname} 36 -76 0 0 0.3 0.3 {}
+T {@name} 35 -52 0 0 0.2 0.2 {}
+T {out_n} 75 -34 0 1 0.2 0.2 {}
+T {out_p} 75 6 0 1 0.2 0.2 {}
+T {in_p} -35 -24 0 0 0.2 0.2 {}
+T {in_n} -35 16 0 0 0.2 0.2 {}
+T {vdd} 25 -24 1 0 0.2 0.2 {}
+T {vtune} 5 -34 1 0 0.2 0.2 {}
+T {vss} 25 6 1 0 0.2 0.2 {}
+T {vbias} 5 6 1 0 0.2 0.2 {}
+T {sdn} -15 26 1 0 0.2 0.2 {}
